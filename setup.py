@@ -12,8 +12,8 @@ requirements = [
 setup(
     name='mba2mfii',
     version='0.0.1',
-    requires_python='>=3.5',
-    description='MBA2MFII converts MBA-exported JSON file inputs into an MF-II Challenge Speed Test CSV file output',
+    requires_python='>=3',
+    description='MBA2MFII is a tool to convert MBA-exported JSON file inputs into an MF-II Challenge Speed Test CSV file output',
     license='BSD',
     author='Jonathan McCormack',
     packages=find_packages(),
@@ -28,7 +28,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Telecommnications Industry',
         'License :: OSI Approved :: BSD License',
-        'Operating System :: POSIX',
+        'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Topic :: Communications',
         'Topic :: Utilities' ])

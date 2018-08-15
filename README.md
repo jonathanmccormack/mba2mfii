@@ -8,7 +8,7 @@ Additional information about the MF-II Challenge Process, how to participate, an
 
 ## System Requirements
 
-MBA2MFII is a Python command-line program that is intended for POSIX platforms (Linux, macOS, etc.), but may work on Windows, and requires Python 3.5 or greater in order to run.
+MBA2MFII is a Python command-line program that is intended for POSIX platforms (Linux, macOS, etc.), but should work on Windows, and requires Python 3 in order to run.
 
 ## Usage
 
