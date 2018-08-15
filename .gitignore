@@ -1,0 +1,15 @@
+# Compiled python modules.
+*.pyc
+__pycache__
+
+# Local data symbolic link
+/data
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
+# macOS Spotlight file
+.DS_Store

@@ -1,0 +1,8 @@
+global-exclude .DS_Store
+global-exclude *.pyc
+exclude MANIFEST.in
+exclude *.txt *.py
+recursive-include mba2mfii/conf/ *
+include mba2mfii/pkg_data/*.csv
+include LICENSE.txt README
+include setup.py

@@ -1,0 +1,135 @@
+provider_id,provider_name,symbolized_name,sim_operator_code
+1,Advantage Cellular,advantage_cellular,310880
+2,AltaComm CellularOne,altacomm_cellularone,310570
+3,America Movil,america_movil,
+4,American Samoa Telecommunications Authority (ASTCA),american_samoa_telecommunications_authority,312150
+5,Appalachian Wireless,appalachian_wireless,310750
+5,Appalachian Wireless,appalachian_wireless,312120
+5,Appalachian Wireless,appalachian_wireless,312130
+6,Arctic Slope Telephone,arctic_slope_telephone,310710
+7,ATN,atn,
+8,AT&T,att,310030
+8,AT&T,att,310070
+8,AT&T,att,310080
+8,AT&T,att,310090
+8,AT&T,att,310150
+8,AT&T,att,310170
+8,AT&T,att,310410
+8,AT&T,att,310680
+8,AT&T,att,310950
+8,AT&T,att,311070
+8,AT&T,att,311090
+8,AT&T,att,312670
+9,Blanca Telephone Company,blanca_telephone_company,
+10,Bluegrass Cellular,bluegrass_cellular,311440
+10,Bluegrass Cellular,bluegrass_cellular,311800
+10,Bluegrass Cellular,bluegrass_cellular,311810
+11,Bluesky,bluesky,
+12,C Spire,c_spire,311230
+13,Carolina West Wireless,carolina_west_wireless,310130
+13,Carolina West Wireless,carolina_west_wireless,312470
+14,Cellcom,cellcom,310600
+14,Cellcom,cellcom,311840
+14,Cellcom,cellcom,311850
+15,Central Texas Telephone Coop (CTTC),central_texas_telephone_coop,310180
+15,Central Texas Telephone Coop (CTTC),central_texas_telephone_coop,311000
+16,Chariton Valley,chariton_valley,312220
+16,Chariton Valley,chariton_valley,311010
+16,Chariton Valley,chariton_valley,311020
+17,Chat Mobility,chat_mobility,311410
+17,Chat Mobility,chat_mobility,312170
+17,Chat Mobility,chat_mobility,312160
+18,Choice Phone,choice_phone,310400
+18,Choice Phone,choice_phone,310480
+18,Choice Phone,choice_phone,311120
+18,Choice Phone,choice_phone,311250
+19,Choice Wireless,choice_wireless,311550
+19,Choice Wireless,choice_wireless,311040
+19,Choice Wireless,choice_wireless,311320
+19,Choice Wireless,choice_wireless,312370
+20,ClearTalk,cleartalk,312900
+20,ClearTalk,cleartalk,312860
+21,Copper Valley Wireless,copper_valley_wireless,310930
+21,Copper Valley Wireless,copper_valley_wireless,312380
+22,Cordova Wireless,cordova_wireless,311240
+23,Custer Telephone Cooperative,custer_telephone_cooperative,312040
+23,Custer Telephone Cooperative,custer_telephone_cooperative,312950
+24,DoCoMo Pacific,docomo_pacific,310370
+25,FMCTC Wireless,fmctc_wireless,
+26,FTC Wireless,ftc_wireless,312390
+27,GCI,gci,310050
+27,GCI,gci,310190
+27,GCI,gci,310430
+27,GCI,gci,311370
+28,GTA Wireless,gta_wireless,310140
+29,Horizon Communications,horizon_communications,312430
+30,Illinois Valley Cellular,illinois_valley_cellular,311340
+31,Indigo Wireless,indigo_wireless,311030
+32,Inland Cellular,inland_cellular,310580
+33,Iowa Wireless,iowa_wireless,310770
+34,James Valley Cooperative Telephone,james_valley_cooperative_telephone,310920
+35,Leaco Wireless,leaco_wireless,311310
+36,Limitless Mobile,limitless_mobile,
+37,Manti Telephone,manti_telephone,
+38,MBO Wireless,mbo_wireless,311140
+38,MBO Wireless,mbo_wireless,312030
+39,MCG PCS,mcg_pcs,312570
+40,Mid-Rivers Cellular,mid_rivers_cellular,310900
+40,Mid-Rivers Cellular,mid_rivers_cellular,312400
+41,MTA Wireless,mta_wireless,312340
+42,Nex-Tech Wireless,nex_tech_wireless,311100
+42,Nex-Tech Wireless,nex_tech_wireless,312420
+43,Northwest Missouri Cellular,northwest_missouri_cellular,311420
+44,Nucla-Naturita Telephone Company,nucla_naturita_telephone_company,313040
+45,Oklahoma Western Telephone Company,oklahoma_western_telephone_company,
+46,Open Mobile,open_mobile,
+47,OTZ Telephone,otz_telephone,311560
+48,Panhandle Telephone,panhandle_telephone,311450
+49,Pine Belt,pine_belt,311670
+50,Pine Cellular,pine_cellular,311080
+51,PinPoint Wireless,pinpoint_wireless,310790
+51,PinPoint Wireless,pinpoint_wireless,311290
+52,Pioneer Enid Cellular,pioneer_enid_cellular,310360
+52,Pioneer Enid Cellular,pioneer_enid_cellular,312270
+52,Pioneer Enid Cellular,pioneer_enid_cellular,312280
+53,PTI Pacifica,pti_pacifica,310110
+55,Sagebrush Cellular,sagebrush_cellular,312330
+55,Sagebrush Cellular,sagebrush_cellular,311350
+56,Smart Call,smart_call,
+57,Smith Bagley,smith_bagley,310320
+58,Snake River PCS,snake_river_pcs,313030
+59,Southern Linc,southern_linc,316011
+60,Sprint,sprint,310120
+60,Sprint,sprint,311490
+60,Sprint,sprint,312530
+61,SRT Communications,srt_communications,
+62,Strata Networks,strata_networks,310960
+62,Strata Networks,strata_networks,311860
+63,TelAlaska,telalaska,311740
+64,Thumb Cellular,thumb_cellular,311050
+64,Thumb Cellular,thumb_cellular,311830
+65,T-Mobile,t_mobile,310160
+65,T-Mobile,t_mobile,310260
+65,T-Mobile,t_mobile,310490
+66,Triangle,triangle,312350
+66,Triangle,triangle,312730
+67,Union Telephone,union_telephone,310020
+68,United Telcom,united_telcom,311650
+69,US Cellular,us_cellular,310066
+69,US Cellular,us_cellular,311220
+69,US Cellular,us_cellular,311580
+70,Verizon Wireless,verizon_wireless,310004
+70,Verizon Wireless,verizon_wireless,310005
+70,Verizon Wireless,verizon_wireless,310006
+70,Verizon Wireless,verizon_wireless,310012
+70,Verizon Wireless,verizon_wireless,311012
+70,Verizon Wireless,verizon_wireless,311480
+71,Viaero Wireless,viaero_wireless,310450
+71,Viaero Wireless,viaero_wireless,310740
+72,Vtel Wireless,vtel_wireless,311470
+72,Vtel Wireless,vtel_wireless,311990
+73,Windy City Cellular,windy_city_cellular,
+74,Worldcall,worldcall,310990
+80,Standing Rock Telecom,standing_rock_telecom,311640
+81,Wireless Partners,wireless_partners,312700
+82,SI Wireless,si_wireless,311910
