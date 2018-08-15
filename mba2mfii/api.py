@@ -48,7 +48,7 @@ class MBAExport:
         self.pdf    =   mba2mfii.data['providers']
         self.hdf    =   mba2mfii.data['handsets']
         
-        if isinstance(fp, string_types):
+        if isinstance(fp, str):
             if not os.path.isfile(fp):
                 raise TypeError('invalid file pointer: {0!r}'.format(fp))
             else:
