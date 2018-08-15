@@ -142,13 +142,13 @@ class MBAExport:
     def get_signal_strength(self, timestamp=None):
         """
         """
-        return self.get_value_by_timestamp(self.signal_strength_dict, timestamp=timestamp)
+        return self.get_value_by_timestamp(self.signal_strength_dict, timestamp=timestamp, default=0)
     
     
     def get_download_speed(self, timestamp=None):
         """
         """
-        return self.get_value_by_timestamp(self.download_speed_dict, timestamp=timestamp)
+        return self.get_value_by_timestamp(self.download_speed_dict, timestamp=timestamp, default=0)
     
     
     def get_latency(self, timestamp=None):
