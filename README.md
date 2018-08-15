@@ -24,7 +24,7 @@ Optional Parameters:
         --clobber               Overwrite existing output file
         --dry-run               Perform all actions except writing output file
         --verbose               Increase verbosity to DEBUG level
-    -h, --help, --usage         Show this usage message and quit
+    -h, --help                  Show this usage message and quit
         --version               Show version information about this script
 ```
 
