@@ -23,14 +23,23 @@ CONTEXT_SETTINGS = dict(help_option_names=[ '-h', '--help' ], token_normalize_fu
 pass_task = click.make_pass_decorator(Task, ensure=True)
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version='0.0.1')
 @input_argument
 @output_argument
-@common_options
 @data_options
+@common_options
+@click.version_option(version='0.0.1')
 @pass_task
 def cli(task, input, output, **kwargs):
     """
+    MBA2MFII is designed to quickly and accurately convert data from the 
+    Measuring Mobile Broadband America (aka "MBA" or "FCC Speed Test") app
+    released by the Federal Communications Commission into the Challenge Speed
+    Test CSV file format required for the Mobility Fund Phase II Challenge
+    Process.
+    
+    Data recorded by the FCC Speed Test app can be exported in JSON format,
+    which must be converted in order to be uploaded into the MF-II Challenge
+    Process Portal, hosted by the Universal Service Administrative Company.
     """
     mba2mfii.init_load()
     mba2mfii.set_logging_level(kwargs.get('verbose', False))

@@ -30,11 +30,14 @@ def device_imei_option(f):
     def callback(ctx, param, value):
         task = ctx.ensure_object(Task)
         if value:
-            task.args['device_imei'] = value
+            if value.isdigit() and (len(value) in range(15, 17)):
+                task.args['device_imei'] = value
+            else:
+                raise click.BadParameter('Device IMEI must be a string of between 15 and 16 digits')
         return value
     return click.option('-i', '--device-imei',
                         required=False,
-                        type=int,
+                        type=str,
                         help='Use specified Device IMEI',
                         callback=callback)(f)
 
