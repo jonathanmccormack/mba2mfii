@@ -6,6 +6,7 @@ import traceback
 
 import mba2mfii
 
+import pandas as pd
 
 
 class Task(object):
