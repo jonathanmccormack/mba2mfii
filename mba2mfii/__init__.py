@@ -3,10 +3,10 @@
 import os, sys
 import logging
 
-logger = logging.getLogger(__name__)
-
 config      =   None
 logger      =   None
+
+__version__ =   '0.0.2'
 
 # Define global variables
 data        =   {}

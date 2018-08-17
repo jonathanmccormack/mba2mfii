@@ -37,7 +37,6 @@ def device_imei_option(f):
         return value
     return click.option('-i', '--device-imei',
                         required=False,
-                        type=str,
                         help='Use specified Device IMEI',
                         callback=callback)(f)
 
@@ -121,7 +120,6 @@ def output_argument(f):
         return value
     return click.argument('output',
                         required=True,
-#                       type=click.File(mode='w'),
                         callback=callback)(f)
 
 

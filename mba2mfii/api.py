@@ -5,6 +5,12 @@ import sys
 import json
 import logging
 
+import inspect
+
+import warnings
+warnings.filterwarnings('ignore', message='numpy.dtype size changed')
+warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
+
 import pandas as pd
 
 import mba2mfii
@@ -13,11 +19,13 @@ from mba2mfii.tools import json_decode
 from itertools import groupby
 from time import strftime
 
+from six import integer_types, string_types, binary_type
+
 
 
 class MBAExport:
     
-    # Reserved properties based upon expected top-level keys in JSON file
+    # Reserved properties based upon expected top-level measurement keys in JSON file
     properties  =   [   ('app_version_code',        None),
                         ('app_version_name',        None),
                         ('datetime',                None),
@@ -44,11 +52,16 @@ class MBAExport:
     def __init__(self, fp, **kwargs):
         """
         """
-        self.logger = logging.getLogger(__name__)
+        import os
+        import logging
+        import json
+        from six import integer_types, string_types
+        
+        self.logger =   logging.getLogger(__name__)
         self.pdf    =   mba2mfii.data['providers']
         self.hdf    =   mba2mfii.data['handsets']
         
-        if isinstance(fp, str):
+        if isinstance(fp, string_types):
             if not os.path.isfile(fp):
                 raise TypeError('invalid file pointer: {0!r}'.format(fp))
             else:
@@ -57,10 +70,10 @@ class MBAExport:
         if not hasattr(fp, 'read'):
             raise TypeError('invalid file pointer: {0!r}'.format(fp))
         
-        if isinstance(fp.read(0), bytes):
+        if 'b' in fp.mode:
             raise TypeError('invalid file pointer: {0!r} (binary mode detected)'.format(fp))
         
-        self.logger.debug('loading file: {0!r}'.format(fp))
+        #self.logger.debug('loading file: {0!r}'.format(fp))
         self.json_data = json.load(fp, object_hook=json_decode)
         
         if isinstance(self.json_data, dict):
@@ -81,10 +94,46 @@ class MBAExport:
         self.provider_name = self.get_provider_name(provider_id=self.provider_id)
     
     
+    def get_value_by_timestamp(self, event_dict, timestamp=None, default=None):
+        """
+        Returns value from object dictionary by matching (or nearest to) timestamp, else default
+        """
+        from six import integer_types, string_types
+        
+        if not isinstance(event_dict, dict):
+            raise TypeError('event_dict argument must be a dictionary:%s' % type(event_dict))
+        
+        if timestamp is None:
+            # Default timestamp is first timestamp in download_tests events or instance timestamp
+            timestamp   =   next((odict['timestamp'] for odict in self.download_tests), self.timestamp)
+        
+        if not isinstance(timestamp, integer_types):
+            self.logger.debug(  'timestamp is not an int:%s (value:%s)', type(timestamp), timestamp)
+            timestamp = int(timestamp)
+        
+        timestamps      =   [ t for t in sorted(event_dict.keys(), key=lambda x: abs(timestamp - x)) ]
+        
+        if not timestamps:
+            self.logger.debug(  'no value detected, returning default:%s (calling function:%s)',
+                                default, inspect.stack()[1][3]  )
+            return default
+        
+        if timestamp not in timestamps:
+            self.logger.debug(  'no such timestamp:%s in timestamps:%s, selecting closest timestamp (calling function:%s)',
+                                timestamp, timestamps, inspect.stack()[1][3] )
+            timestamp   =   next((t for t in timestamps), None)
+        
+        return event_dict.get(timestamp, default)
+    
+    
     def get_provider_tuple(self, code=None, provider_id=None):
         """
+        Returns tuple of (provider_id, provider_name) from providers dataframe matching 'sim_operator_code' value from measurements
         """
-        if not isinstance(code, int):
+        import pandas as pd
+        from six import integer_types, string_types
+        
+        if not isinstance(code, integer_types):
             code = int(self.sim_operator_code)
         
         if provider_id in list(self.pdf.provider_id.values):
@@ -97,68 +146,67 @@ class MBAExport:
         return next(((pid, pname) for pid, pname in pdf[['provider_id', 'provider_name']].values), (None, None))
     
     
-    def get_value_by_timestamp(self, event_dict, timestamp=None, default=None):
+    def get_lat_long_tuple(self, timestamp=None):
         """
-        """
-        if not isinstance(event_dict, dict):
-            raise TypeError('event_dict argument must be a dictionary: %s' % type(event_dict))
-        
-        if timestamp is None:
-            # Default timestamp is first timestamp in download_tests events or instance timestamp
-            timestamp   =   next((odict['timestamp'] for odict in self.download_tests), self.timestamp)
-        
-        if not isinstance(timestamp, int):
-            self.logger.debug(  'timestamp is not an int:%s (value:%s)', type(timestamp), timestamp)
-            timestamp = int(timestamp)
-        
-        timestamps      =   [ t for t in sorted(event_dict.keys(), key=lambda x: abs(timestamp - x)) ]
-        
-        if timestamp not in timestamps:
-            self.logger.debug(  'cannot find match for timestamp:%s in timestamps:%s, selecting next closest timestamp',
-                                timestamp, timestamps )
-            timestamp   =   next((t for t in timestamps), None)
-        
-        return event_dict.get(timestamp, default)
-    
-    
-    def get_lat_long(self, timestamp=None):
-        """
+        Returns tuple of (latitude, longitude) from cell location metrics matching timestamp
         """
         return self.get_value_by_timestamp(self.lat_long_dict, timestamp=timestamp, default=(None, None))
     
     
+    def get_phone_type_tuple(self, timestamp=None):
+        """
+        Returns tuple of (phone_type, phone_type_code) from network data metrics matching timestamp
+        """
+        return self.get_value_by_timestamp(self.phone_type_dict, timestamp=None, default=(None, None))
+    
+    
+    # Methods returning columnar values for dataframe
+    
     def get_latitude(self, timestamp=None):
-        return self.get_lat_long(timestamp=timestamp)[0]
+        """
+        Returns 'latitude' value from cell location metrics matching timestamp
+        """
+        return self.get_lat_long_tuple(timestamp=timestamp)[0]
     
     
     def get_longitude(self, timestamp=None):
-        return self.get_lat_long(timestamp=timestamp)[1]
+        """
+        Returns 'longitude' value from cell location metrics matching timestamp
+        """
+        return self.get_lat_long_tuple(timestamp=timestamp)[1]
     
     
     def get_timestamp(self, timestamp=None):
+        """
+        Returns 'datetime' value from download tests matching timestamp
+        """
         return self.get_value_by_timestamp(self.datetime_dict, timestamp=timestamp)
     
     
     def get_signal_strength(self, timestamp=None):
         """
+        Returns converted 'dbm' or 'signal_strength' value from cell location metrics matching timestamp
         """
         return self.get_value_by_timestamp(self.signal_strength_dict, timestamp=timestamp, default=0)
     
     
     def get_download_speed(self, timestamp=None):
         """
+        Returns converted 'bytes_sec' value from download tests matching timestamp
         """
         return self.get_value_by_timestamp(self.download_speed_dict, timestamp=timestamp, default=0)
     
     
     def get_latency(self, timestamp=None):
         """
+        Returns converted 'rtt_avg' value from latency tests matching timestamp
         """
         return int(self.get_value_by_timestamp(self.latency_dict, timestamp=timestamp, default=0))
     
     
-    def get_provider_id(self, timestamp=None):
+    def get_provider_id(self, **kwargs):
         """
+        Returns detected 'provider_id' value from providers dataframe matching 'sim_operator_code' value from measurements
         """
         if self.provider_id:
             return self.provider_id
@@ -166,8 +214,9 @@ class MBAExport:
             return self.get_provider_tuple(code=self.sim_operator_code)[0]
     
     
-    def get_provider_name(self, timestamp=None, provider_id=None):
+    def get_provider_name(self, provider_id=None, **kwargs):
         """
+        Returns detected 'provider_name' value from providers dataframe matching 'sim_operator_code' value from measurements
         """
         if self.provider_name:
             return self.provider_name
@@ -177,82 +226,114 @@ class MBAExport:
     
     def get_device_id(self, timestamp=None):
         """
+        Returns detected 'device_id' value from handsets dataframe matching 'sim_operator_code' value from measurements
         """
         if self.device_id:
             return self.device_id
         else:
-            device_id = None
+            hdf         =   self.hdf
+            make, model =   self.handset_tuple
+            provider_id =   self.get_provider_id()
             
-            hdf = self.hdf[self.hdf.provider_id==self.get_provider_id()]
-            manufacturer, model = self.handset_tuple
-            if manufacturer.lower() == 'apple' and model.lower() == 'iphone 3g':
-                # Special case for newer iOS devices that report as "iPhone 3G"
-                code = self.get_value_by_timestamp(self.phone_type_dict, timestamp=timestamp)[1]
-                device_id = next((id for id in hdf[hdf.device_code.str.lower()==code.lower()].device_id.values), None)
-            elif model.lower() in list(hdf.device_marketing_name.str.lower()):
-                device_id = next((id for id in hdf[hdf.device_marketing_name.str.lower()==model.lower()].device_id.values), None)
-                self.logger.debug(  'found exact device match for handset:%s -- returning id:%s',
-                                    self.handset_tuple, id  )
-            elif manufacturer.lower() in list(hdf.device_manufacturer.str.lower()):
-                hdf = hdf[hdf.device_manufacturer.str.lower()==manufacturer.lower()]
-                self.logger.info(   'found manufacturer match for handset:%s -- possible devices:%s',
-                                    self.handset_tuple, list(hdf.device_marketing_name.values)  )
+            if make.lower() == 'apple':
+                code    =   str(self.phone_type_tuple[1]).lower()
+                model   =   next((model for model in hdf[hdf.device_code.str.lower()==code].device_marketing_name.values), model)
+            
+            device_ids  =   list(hdf[hdf.device_marketing_name.str.lower()==model.lower()].device_id.values)
+            hdf         =   hdf[hdf.provider_id==provider_id]
+            
+            if hdf[hdf.device_id.isin(device_ids)].empty:
+                if len(device_ids) == 1:
+                    device_id   =   next((id for id in device_ids), None)
+                    self.logger.warn(   'Device ID:%s detected but not approved for Provider ID:%s (make:%s model:%s)',
+                                        device_id, provider_id, make, model     )
+                elif len(device_ids) > 1:
+                    device_id   =   None
+                    self.logger.warn(   'Multiple Device IDs:%s detected but none approved for Provider ID:%s (make:%s model:%s)',
+                                        device_ids, provider_id, make, model    )
+                else:
+                    device_id   =   None
+                    self.logger.warn(   'No devices matched for Provider ID:%s (make:%s model:%s) -- allowed Device IDs:%s',
+                                        provider_id, make, model, list(hdf.device_id.values)    )
             else:
-                self.logger.warn(   'cannot find manufacturer or device model for handset:%s (provider ID:%s)',
-                                    self.handset_tuple, self.get_provider_id()  )
+                device_ids  =   list(hdf[hdf.device_id.isin(device_ids)].device_id.values)
+                if len(device_ids) == 1:
+                    device_id   =   next((id for id in device_ids), None)
+                    self.logger.debug(  'Device ID:%s detected and approved for Provider ID:%s (make:%s model:%s)',
+                                        device_id, make, model  )
+                else:
+                    device_id   =   next((id for id in device_ids), None)
+                    self.logger.warn(  'Multiple Device IDs:%s detected and approved for Provider ID:%s (make:%s model:%s) -- returning Device ID:%s',
+                                        device_ids, make, model, device_id  )
             return device_id
-        
     
     
     def get_device_imei(self, timestamp=None):
         """
+        Returns 'device_imei' value if specified during initialization, else default
         """
         return self.device_imei
     
     
     def get_measurement_method_code(self, timestamp=None):
         """
+        Returns 'measurement_method_code' value if specified during initialization, else default
         """
         return self.measurement_method_code
     
     
     def get_measurement_app_name(self, timestamp=None):
         """
+        Returns 'measurement_app_name' value if specified during initialization, else default
         """
         return self.measurement_app_name
     
     
     def get_measurement_server_location(self, timestamp=None):
         """
+        Returns combined 'target' and 'target_ipaddress' values from download tests matching timestamp
         """
         return self.get_value_by_timestamp(self.target_dict, timestamp=timestamp)
     
     
     def get_odict(self, array, filter):
         """
+        Returns first object dictionary from array matching filter
         """
         return next((odict for odict in self.get_odicts(array, filter)), {})
     
     
     def get_odicts(self, array, filter=None):
         """
+        Returns all object dictionaries from array matching filter
         """
         return [ odict for odict in array if ( (filter is None) or (odict.get('type') == filter) ) ]
     
     
     def get_events(self, array, filter=None):
+        """
+        Returns all event tuples of (timestamp, type) from array matching filter
+        """
         return sorted( [    ( odict['timestamp'], odict['type'] ) for odict in array
                             if (filter is None) or (odict.get('type') == filter)  ],
                         key=lambda x: x[0] )
     
     
     def get_events_dict(self, array, filter=None):
+        """
+        Returns event dictionary grouping events by timestamp from array matching filter
+        """
+        from itertools import groupby
+        
         return { key: [ val for _, val in vlist ] for key, vlist in groupby( self.get_events(array, filter), key=lambda x: x[0] ) }
     
     
     def to_dataframe(self):
         """
+        Returns pandas dataframe for each download_test_events entry
         """
+        import pandas as pd
+        
         columns =   [   'latitude', 'longitude', 'timestamp', 'signal_strength', 'download_speed', 'latency',
                         'provider_id', 'provider_name', 'device_id', 'device_imei', 'measurement_method_code',
                         'measurement_app_name', 'measurement_server_location'   ]
@@ -270,7 +351,10 @@ class MBAExport:
     
     def to_csv(self, filename):
         """
+        Writes pandas dataframe to CSV file
         """
+        import os
+        
         try:
             os.makedirs(os.path.dirname(filename))
         except:
@@ -291,6 +375,34 @@ class MBAExport:
     
     
     @property
+    def network_data_metrics(self):
+        return self.get_odicts(array=self.metrics, filter='network_data')
+    
+    
+    @property
+    def cell_location_metrics(self):
+        return  [   odict for odicts in [
+                        self.get_odicts(array=self.metrics, filter='cdma_cell_location'),
+                        self.get_odicts(array=self.metrics, filter='gsm_cell_location')     
+                    ] for odict in odicts   ]
+    
+    
+    @property
+    def phone_identity_metric(self):
+        return self.get_odict(array=self.metrics, filter='phone_identity')
+    
+    
+    @property
+    def test_types(self):
+        return [ odict.get('type') for odict in self.tests ]
+    
+    
+    @property
+    def metric_types(self):
+        return [ odict.get('type') for odict in self.metrics ]
+    
+    
+    @property
     def lat_long_dict(self):
         return { odict['timestamp']: ( odict['latitude'], odict['longitude'] ) for odict in self.location_metrics }
     
@@ -301,20 +413,10 @@ class MBAExport:
     
     
     @property
-    def network_data_metrics(self):
-        return self.get_odicts(array=self.metrics, filter='network_data')
-    
-    
-    @property
-    def cell_location_metrics(self):
-        return [    *self.get_odicts(array=self.metrics, filter='cdma_cell_location'),
-                    *self.get_odicts(array=self.metrics, filter='gsm_cell_location')    ]
-    
-    
-    @property
     def signal_strength_dict(self):
+        from six import integer_types, string_types
         def _convert_asu(val):
-            if isinstance(val, int):
+            if isinstance(val, integer_types):
                 return ((2 * val) - 114)
             return val
         
@@ -324,8 +426,9 @@ class MBAExport:
     
     @property
     def download_speed_dict(self):
+        from six import integer_types, string_types
         def _convert_bps(val):
-            if isinstance(val, int):
+            if isinstance(val, integer_types):
                 return (0.000008 * val)
             return val
         
@@ -334,8 +437,9 @@ class MBAExport:
     
     @property
     def latency_dict(self):
+        from six import integer_types, string_types
         def _convert_us(val):
-            if isinstance(val, int):
+            if isinstance(val, integer_types):
                 return int(0.001 * val)
             return val
         
@@ -353,23 +457,13 @@ class MBAExport:
     
     
     @property
-    def test_types(self):
-        return [ odict.get('type') for odict in self.tests ]
-    
-    
-    @property
-    def metric_types(self):
-        return [ odict.get('type') for odict in self.metrics ]
-    
-    
-    @property
-    def phone_identity(self):
-        return self.get_odict(array=self.metrics, filter='phone_identity')
-    
-    
-    @property
     def handset_tuple(self):
-        return ( self.phone_identity['manufacturer'], self.phone_identity['model'] )
+        return ( self.phone_identity_metric['manufacturer'], self.phone_identity_metric['model'] )
+    
+    
+    @property
+    def phone_type_tuple(self):
+        return self.get_value_by_timestamp(self.phone_type_dict, default=(None, None))
     
     
     @property

@@ -4,12 +4,13 @@ import os, sys
 
 import importlib
 import logging
-logger = logging.getLogger(__name__)
 
 import click
 
 import mba2mfii
-#from mba2mfii.tools import symbolize, get_folders_by_regex, get_mdict_folders, get_layers
+
+from mba2mfii import __version__ as mba2mfii_version
+
 from mba2mfii.tasks import Task
 from mba2mfii.api import MBAExport
 
@@ -27,7 +28,8 @@ pass_task = click.make_pass_decorator(Task, ensure=True)
 @output_argument
 @data_options
 @common_options
-@click.version_option(version='0.0.1')
+@click.version_option(version=mba2mfii_version)
+@click.version_option(sys.version, '--python-version', prog_name='Python')
 @pass_task
 def cli(task, input, output, **kwargs):
     """
@@ -44,6 +46,8 @@ def cli(task, input, output, **kwargs):
     mba2mfii.init_load()
     mba2mfii.set_logging_level(kwargs.get('verbose', False))
     
+    logger = logging.getLogger(__name__)
+    
     logger.debug('calling core command mba2mfii cli')
     
     for fp in task.input:
@@ -59,6 +63,7 @@ def cli(task, input, output, **kwargs):
             logger.error('cannot load MBA export:%s', fp)
             raise
     
+    task.sort_output(sort_columns=[ 'timestamp' ], ascending=False)
     task.write_output(output)
 
 

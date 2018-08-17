@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import os, sys
-import traceback
+import logging
 
-import mba2mfii
+import warnings
+warnings.filterwarnings('ignore', message='numpy.dtype size changed')
+warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 
 import pandas as pd
 
@@ -12,6 +13,9 @@ import pandas as pd
 class Task(object):
     
     def __init__(self):
+        import pandas as pd
+        import logging
+        
         self.input  =   []
         self.output =   None
         
@@ -42,10 +46,20 @@ class Task(object):
             self.data = self.data.append(df, ignore_index=True)
     
     
+    def sort_output(self, sort_columns=None, ascending=True):
+        """
+        Sort data values by sort_columns
+        """
+        if sort_columns:
+            self.data = self.data.sort_values(by=sort_columns, ascending=ascending)
+    
+    
     def write_output(self, output=None):
         """
         Write combined pandas DataFrame to output CSV
         """
+        import os
+        
         if output is None:
             output = self.output
         

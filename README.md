@@ -6,16 +6,22 @@ MBA2MFII is designed to quickly and accurately convert data from the [Measuring 
 
 Additional information about the MF-II Challenge Process, how to participate, and the USAC MF-II Challenge Portal is available on the [MF-II webpage](https://www.fcc.gov/mobility-fund-phase-2).
 
-## System Requirements
+## Installing
 
-MBA2MFII is a Python command-line program that is intended for POSIX platforms (Linux, macOS, etc.), but should work on Windows, and requires Python 3 in order to run.
+MBA2MFII is a command-line script that supports Python 2.7 or Python 3.
+
+Install and update using pip:
+
+```console
+pip install git+https://github.com/jonathanmccormack/mba2mfii
+```
 
 ## Usage
 
 ### Command-line
 
 ```console
-Usage: mba2mfii [options] [INPUTS] [OUTPUT]
+Usage: mba2mfii [options] [INPUT]... [OUTPUT]
 
 Optional Parameters:
     -i, --device-imei           Use specified Device IMEI
@@ -28,8 +34,8 @@ Optional Parameters:
         --version               Show version information about this script
 ```
 
-## Release Notes
+### Description
 
-### MBA2MFII Tool 0.0.1 [2018-08-15]
+Converts one or more INPUTs to OUTPUT.
 
-* Initial release
+Arguments provided for INPUT should be either an individual JSON file or a folder containing JSON files exported from the FCC Speed Test app.  INPUT files are converted and exported as OUTPUT in CSV format matching the Challenge Speed Test file structure.

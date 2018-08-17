@@ -4,6 +4,7 @@ Common tools for use throughout script
 
 import sys
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +21,12 @@ def symbolize(string):
 
 
 def json_decode(obj):
-    if isinstance(obj, str):
+    """
+    Override default JSON decoder to recursively convert integer-like strings into integers
+    """
+    from six import string_types
+    
+    if isinstance(obj, string_types):
         try:
             return int(obj)
         except ValueError:
