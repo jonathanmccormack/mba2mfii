@@ -2,7 +2,7 @@ global-exclude .DS_Store
 global-exclude *.pyc
 exclude MANIFEST.in
 exclude *.txt *.py
-include mba2mfii/conf/*.conf
+include mba2mfii/conf/*.yml
 include mba2mfii/pkg_data/*.csv
 include LICENSE.txt README.md
 include setup.py
