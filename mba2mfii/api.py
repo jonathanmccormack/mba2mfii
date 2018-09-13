@@ -16,6 +16,8 @@ import pandas as pd
 import mba2mfii
 from mba2mfii.tools import json_decode
 
+from re import match, sub
+
 from itertools import groupby
 from time import strftime
 
@@ -48,6 +50,11 @@ class MBAExport:
                         ('measurement_method_code', 1   ),
                         ('measurement_app_name',    'FCC Speed Test app')
                     ]
+
+    test_ids    =   {   'target':   'CLOSESTTARGET',
+                        'download': 'JHTTPGETMT',
+                        'upload':   'JHTTPPOSTMT',
+                        'latency':  'JUDPLATENCY'   }
 
     def __init__(self, fp, **kwargs):
         """
@@ -235,9 +242,14 @@ class MBAExport:
             make, model =   self.handset_tuple
             provider_id =   self.get_provider_id()
 
+            smregex     =   r'(?i)^(?:SM|SGH)-(?P<model>.+)$'
+
             if make.lower() == 'apple':
                 code    =   str(self.phone_type_tuple[1]).lower()
                 model   =   next((model for model in hdf[hdf.device_code.str.lower()==code].device_marketing_name.values), model)
+            elif make.lower() == 'samsung' and match(smregex, model):
+                dmodel  =   sub(smregex, '\g<model>', model).lower()
+                model   =   next((model for model in hdf[hdf.device_model.str.lower()==dmodel].device_marketing_name.values), model)
 
             device_ids  =   list(hdf[hdf.device_marketing_name.str.lower()==model.lower()].device_id.values)
             hdf         =   hdf[hdf.provider_id==provider_id]
@@ -339,7 +351,14 @@ class MBAExport:
                         'measurement_app_name', 'measurement_server_location'   ]
 
         array = []
-        for timestamp in self.download_test_events:
+        if self.download_test_events:
+            events  =   self.download_test_events
+        elif self.test_ids['download'] in self.requested_tests:
+            events  =   self.target_test_events
+        else:
+            events  =   []
+
+        for timestamp in events:
             row = []
             for column in columns:
                 func = getattr(self, 'get_{}'.format(column))
@@ -448,12 +467,14 @@ class MBAExport:
 
     @property
     def datetime_dict(self):
-        return { odict['timestamp']: odict['datetime'] for odict in self.download_tests }
+        return { odict['timestamp']: odict['datetime'] for odict in self.all_tests }
 
 
     @property
     def target_dict(self):
-        return { odict['timestamp']: '{} / {}'.format(odict['target'], odict['target_ipaddress']) for odict in self.download_tests }
+        return {    odict['timestamp']: '{} / {}'.format(   odict.get('target', odict.get('closest_target', '')),
+                                                            odict.get('target_ipaddress', odict.get('ip_closest_target', '')) )
+                    for odict in self.all_tests }
 
 
     @property
@@ -467,18 +488,28 @@ class MBAExport:
 
 
     @property
+    def all_tests(self):
+        return self.get_odicts(array=self.tests)
+
+
+    @property
+    def target_tests(self):
+        return self.get_odicts(array=self.tests, filter=self.test_ids['target'])
+
+
+    @property
     def download_tests(self):
-        return self.get_odicts(array=self.tests, filter='JHTTPGETMT')
+        return self.get_odicts(array=self.tests, filter=self.test_ids['download'])
 
 
     @property
     def upload_tests(self):
-        return self.get_odicts(array=self.tests, filter='JHTTPPOSTMT')
+        return self.get_odicts(array=self.tests, filter=self.test_ids['upload'])
 
 
     @property
     def latency_tests(self):
-        return self.get_odicts(array=self.tests, filter='JUDPLATENCY')
+        return self.get_odicts(array=self.tests, filter=self.test_ids['latency'])
 
 
     @property
@@ -497,9 +528,23 @@ class MBAExport:
 
 
     @property
-    def download_test_events(self):
-        return self.get_events_dict(array=self.tests, filter='JHTTPGETMT').keys()
+    def target_test_events(self):
+        return self.get_events_dict(array=self.tests, filter=self.test_ids['target']).keys()
 
+
+    @property
+    def download_test_events(self):
+        return self.get_events_dict(array=self.tests, filter=self.test_ids['download']).keys()
+
+
+    @property
+    def upload_test_events(self):
+        return self.get_events_dict(array=self.tests, filter=self.test_ids['upload']).keys()
+
+
+    @property
+    def latency_test_events(self):
+        return self.get_events_dict(array=self.tests, filter=self.test_ids['latency']).keys()
 
 
 #
