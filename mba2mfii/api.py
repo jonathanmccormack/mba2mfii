@@ -474,9 +474,12 @@ class MBAExport:
 
     @property
     def target_dict(self):
-        return {    odict['timestamp']: '{} / {}'.format(   odict.get('target', odict.get('closest_target', '')),
-                                                            odict.get('target_ipaddress', odict.get('ip_closest_target', '')) )
-                    for odict in self.all_tests }
+        def _format_target(odict):
+            arr =   [ x for x in [  odict.get('target', odict.get('closest_target')),
+                                    odict.get('target_ipaddress', odict.get('ip_closest_target')) ]
+                        if isinstance(x, str) and x != '-' ]
+            return ' / '.join(arr if arr else [ 'N/A' ])
+        return {    odict['timestamp']: _format_target(odict) for odict in self.all_tests }
 
 
     @property
