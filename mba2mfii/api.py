@@ -130,7 +130,7 @@ class MBAExport:
                                 timestamp, timestamps, inspect.stack()[1][3] )
             timestamp   =   next((t for t in timestamps), None)
 
-        return event_dict.get(timestamp, default)
+        return event_dict.get(timestamp) or default
 
 
     def get_provider_tuple(self, code=None, provider_id=None):
@@ -305,7 +305,7 @@ class MBAExport:
         """
         Returns combined 'target' and 'target_ipaddress' values from download tests matching timestamp
         """
-        return self.get_value_by_timestamp(self.target_dict, timestamp=timestamp)
+        return self.get_value_by_timestamp(self.target_dict, timestamp=timestamp, default='N/A')
 
 
     def get_odict(self, array, filter):
@@ -477,8 +477,8 @@ class MBAExport:
         def _format_target(odict):
             arr =   [ x for x in [  odict.get('target', odict.get('closest_target')),
                                     odict.get('target_ipaddress', odict.get('ip_closest_target')) ]
-                        if isinstance(x, str) and x != '-' ]
-            return ' / '.join(arr if arr else [ 'N/A' ])
+                        if isinstance(x, string_types) and x != '-' ]
+            return ' / '.join(arr) if arr else None
         return {    odict['timestamp']: _format_target(odict) for odict in self.all_tests }
 
 
