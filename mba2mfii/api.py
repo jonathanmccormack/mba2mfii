@@ -319,7 +319,7 @@ class MBAExport:
         """
         Returns all object dictionaries from array matching filter
         """
-        return [ odict for odict in array if ( (filter is None) or (odict.get('type') == filter) ) ]
+        return [ odict for odict in array if ( (filter is None) or ( filter(odict) if callable(filter) else odict.get('type') == filter) ) ]
 
 
     def get_events(self, array, filter=None):
@@ -327,7 +327,8 @@ class MBAExport:
         Returns all event tuples of (timestamp, type) from array matching filter
         """
         return sorted( [    ( odict['timestamp'], odict['type'] ) for odict in array
-                            if (filter is None) or (odict.get('type') == filter)  ],
+                            if ((filter is None) or
+                                (filter(odict) if callable(filter) else odict.get('type') == filter) )  ],
                         key=lambda x: x[0] )
 
 
@@ -337,7 +338,8 @@ class MBAExport:
         """
         from itertools import groupby
 
-        return { key: [ val for _, val in vlist ] for key, vlist in groupby( self.get_events(array, filter), key=lambda x: x[0] ) }
+        return { key: [ val for _, val in vlist ] for key, vlist in groupby(self.get_events(array, filter),
+                                                                            key=lambda x: x[0] ) }
 
 
     def to_dataframe(self):
@@ -499,17 +501,20 @@ class MBAExport:
 
     @property
     def download_tests(self):
-        return self.get_odicts(array=self.tests, filter=self.test_ids['download'])
+        return self.get_odicts( array=self.tests,
+                                filter=lambda x: (x.get('type') == self.test_ids['download']) and (x.get('success') == True) )
 
 
     @property
     def upload_tests(self):
-        return self.get_odicts(array=self.tests, filter=self.test_ids['upload'])
+        return self.get_odicts( array=self.tests,
+                                filter=lambda x: (x.get('type') == self.test_ids['upload']) and (x.get('success') == True) )
 
 
     @property
     def latency_tests(self):
-        return self.get_odicts(array=self.tests, filter=self.test_ids['latency'])
+        return self.get_odicts( array=self.tests,
+                                filter=lambda x: (x.get('type') == self.test_ids['latency']) and (x.get('success') == True) )
 
 
     @property

@@ -25,12 +25,16 @@ def json_decode(obj):
     Override default JSON decoder to recursively convert integer-like strings into integers
     """
     from six import string_types
-    
+    from distutils.util import strtobool
+
     if isinstance(obj, string_types):
         try:
             return int(obj)
         except ValueError:
-            return obj
+            try:
+                return bool(strtobool(obj))
+            except ValueError:
+                return obj
     elif isinstance(obj, dict):
         return { k: json_decode(v) for k, v in obj.items() }
     elif isinstance(obj, list):
