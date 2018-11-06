@@ -22,19 +22,27 @@ def symbolize(string):
 
 def json_decode(obj):
     """
-    Override default JSON decoder to recursively convert integer-like strings into integers
+    Override default JSON decoder to recursively convert strings into numeric or boolean
     """
     from six import string_types
+    from decimal import InvalidOperation, Decimal as decimal
     from distutils.util import strtobool
 
+    str_converters  =   [   ( lambda x: int(x) if (int(x) == decimal(x)) else decimal(x), (ValueError, InvalidOperation) ),
+                            ( lambda x: decimal(x), (ValueError, InvalidOperation) ),
+                            ( lambda x: bool(strtobool(x)), ValueError ) ]
+
     if isinstance(obj, string_types):
-        try:
-            return int(obj)
-        except ValueError:
+        for converter, error in str_converters:
+            if not callable(converter):
+                continue
             try:
-                return bool(strtobool(obj))
-            except ValueError:
-                return obj
+                return converter(obj)
+            except error:
+                pass
+        return obj
+    elif isinstance(obj, (float, decimal)) and (int(obj) == decimal(obj)):
+        return int(obj)
     elif isinstance(obj, dict):
         return { k: json_decode(v) for k, v in obj.items() }
     elif isinstance(obj, list):

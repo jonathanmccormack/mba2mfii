@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore', message='numpy.ufunc size changed')
 config      =   None
 logger      =   None
 
-__version__ =   '0.0.2'
+__version__ =   '0.1.0'
 
 # Define global variables
 data        =   {}
@@ -18,7 +18,7 @@ data        =   {}
 
 def set_logging_level(verbose=False):
     import os, sys, logging
-    
+
     logger = logging.getLogger(__name__)
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -31,10 +31,10 @@ def init_load_config(filename='conf/config.yml'):
     import os, sys, logging
     import yaml
     from pkg_resources import resource_string, resource_exists, resource_stream
-    
+
     global config
     logger = logging.getLogger(__name__)
-    
+
     if resource_exists(__name__, filename):
         logger.info('initializing package configuration (file:%s)', filename)
         config = yaml.safe_load(resource_string(__name__, filename))
@@ -48,9 +48,9 @@ def init_load_logging(filename='conf/logging.yml', logpath='logs'):
     import logging.config
     import yaml
     from pkg_resources import resource_string, resource_exists, resource_stream, resource_filename
-    
+
     logger = logging.getLogger(__name__)
-    
+
     if resource_exists(__name__, filename):
         logger.info('initializing logging configuration (file:%s)', filename)
         logging_config = yaml.safe_load(resource_string(__name__, filename))
@@ -80,16 +80,16 @@ def _init_load_datafile(label, filename=None, headers=None):
     import os, sys, logging
     import pandas as pd
     from pkg_resources import resource_string, resource_exists, resource_stream
-    
+
     global config
     logger = logging.getLogger(__name__)
-    
+
     if config is None:
         init_load()
-    
+
     if filename is None:
         filename = 'pkg_data/{0}'.format(config['data'][label])
-    
+
     if resource_exists(__name__, filename):
         if isinstance(headers, list):
             logger.info('initializing %s (file:%s headers:%s)', label, filename, headers)
@@ -106,15 +106,15 @@ def init_load(files=[]):
     Helper method to load all configuration and data
     """
     import os, sys, logging
-    
+
     logger = logging.getLogger(__name__)
     if not files:
         files   =   [   'providers', 'handsets'  ]
-    
+
     init_load_config()
     init_load_logging()
     init_env()
-    
+
     for file in files:
         func = getattr(sys.modules[__name__], '_'.join(['init_load', file]), None)
         if callable(func):
@@ -125,13 +125,13 @@ def init_load(files=[]):
 
 def init_env(**kwargs):
     import os, sys, logging
-    
+
     global config
     logger = logging.getLogger(__name__)
-    
+
     if not kwargs:
         pass
-    
+
     for var, value in config.get('env', {}).items():
         if value is not None:
             logger.info('setting OS environment variable:%s to value:%s', var, value)
@@ -140,33 +140,33 @@ def init_env(**kwargs):
 
 
 class DryRunError(Exception):
-    
+
     def __init__(self, value=None):
         self.value = value if value else 'dry-run caught'
-    
-    
+
+
     def __str__(self):
         return repr(self.value)
 
 
 
 class ClobberError(Exception):
-    
+
     def __init__(self, value=None):
         self.value = value if value else 'clobber caught'
-    
-    
+
+
     def __str__(self):
         return repr(self.value)
 
 
 
 class TaskError(Exception):
-    
+
     def __init__(self, value=None):
         self.value = value if value else 'task error caught'
-    
-    
+
+
     def __str__(self):
         return repr(self.value)
 

@@ -25,7 +25,7 @@ from six import integer_types, string_types, binary_type
 
 
 
-class MBAExport:
+class SKLegacyExport(object):
 
     # Reserved properties based upon expected top-level measurement keys in JSON file
     properties  =   [   ('app_version_code',        None),
@@ -56,38 +56,20 @@ class MBAExport:
                         'upload':   'JHTTPPOSTMT',
                         'latency':  'JUDPLATENCY'   }
 
-    def __init__(self, fp, **kwargs):
+    def __init__(self, data, **kwargs):
         """
         """
-        import os
-        import logging
-        import json
-        from six import integer_types, string_types
-
         self.logger =   logging.getLogger(__name__)
         self.pdf    =   mba2mfii.data['providers']
         self.hdf    =   mba2mfii.data['handsets']
 
-        if isinstance(fp, string_types):
-            if not os.path.isfile(fp):
-                raise TypeError('invalid file pointer: {0!r}'.format(fp))
-            else:
-                fp = open(fp, 'r')
+        try:
+            assert isinstance(data, dict), 'data must be a JSON dict:%s' % data
+        except AssertionError:
+            self.logger.error('Must initialize {} with valid data:{}'.format(self.__class__.__name__, type(data)))
+            raise
 
-        if not hasattr(fp, 'read'):
-            raise TypeError('invalid file pointer: {0!r}'.format(fp))
-
-        if 'b' in fp.mode:
-            raise TypeError('invalid file pointer: {0!r} (binary mode detected)'.format(fp))
-
-        #self.logger.debug('loading file: {0!r}'.format(fp))
-        self.json_data = json.load(fp, object_hook=json_decode)
-
-        if isinstance(self.json_data, dict):
-            self.json_data = [ self.json_data ]
-
-        if len(self.json_data) > 1:
-            self.logger.warn('multiple submissions detected')
+        self.data   =   data
 
         # Initialize properties for each top-level key defined in properties
         for key, val in self.properties:
@@ -367,7 +349,10 @@ class MBAExport:
                 row.append(func(timestamp=timestamp))
             array.append(row)
 
-        return pd.DataFrame(array, columns=columns)
+        return pd.DataFrame(array, columns=columns).round( {
+            'latitude':         8,
+            'longitude':        8,
+            'download_speed':   6   } )
 
 
     def to_csv(self, filename):
@@ -385,9 +370,7 @@ class MBAExport:
         df.to_csv(filename, index=False)
 
 
-    @property
-    def data(self):
-        return next((data for data in self.json_data), dict())
+    # Properties
 
 
     @property
